@@ -1,5 +1,23 @@
 const WebSocket = require("ws");
 
+class Queue {
+  constructor() {
+    this.queue = new Map();
+  }
+
+  add(id, callback) {
+    this.queue.set(id, callback);
+  }
+
+  get(id) {
+    return this.queue.get(id);
+  }
+
+  remove(id) {
+    this.queue.delete(id);
+  }
+}
+
 class Sprut {
   constructor(opts) {
     const { wsUrl, sprutLogin, sprutPassword, serial, logger } = opts;
@@ -11,7 +29,7 @@ class Sprut {
     this.serial = serial;
     this.isConnected = false;
     this.idCounter = 1;
-    this.pendingRequests = {}; // Store pending requests
+    this.queue = new Queue();
 
     if (!wsUrl || !sprutLogin || !sprutPassword || !serial) {
       throw new Error("wsUrl, sprutLogin, sprutPassword, serial must be set");
@@ -26,10 +44,14 @@ class Sprut {
   onMessage(data) {
     try {
       const response = JSON.parse(data);
+      if (!response.event) {
+        this.log.debug(response, "Received message:");
+      }
       const id = response.id;
-      if (this.pendingRequests[id]) {
-        this.pendingRequests[id](response.result); // Resolve the promise with the response
-        delete this.pendingRequests[id]; // Clean up the entry
+      const callback = this.queue.get(id);
+      if (callback) {
+        callback(response); // Resolve the promise with the response
+        this.queue.remove(id);
       }
     } catch (error) {
       this.log.error("Error parsing message:", error);
@@ -56,7 +78,6 @@ class Sprut {
   call(json) {
     return new Promise((resolve, reject) => {
       const id = this.getNextId();
-      this.pendingRequests[id] = resolve; // Store the resolve function for later
       const payload = {
         jsonrpc: "2.0",
         params: json,
@@ -67,7 +88,17 @@ class Sprut {
         payload.serial = this.serial;
       }
 
-      this.sendJson(payload).catch(reject);
+      if (this.wsClient && this.wsClient.readyState === WebSocket.OPEN) {
+        this.wsClient.send(JSON.stringify(payload), (error) => {
+          if (error) {
+            reject(error);
+          } else {
+            this.queue.add(id, resolve);
+          }
+        });
+      } else {
+        this.log.error("WebSocket is not open. Cannot send message.");
+      }
     });
   }
 
@@ -75,21 +106,9 @@ class Sprut {
     return this.idCounter++;
   }
 
-  sendJson(json) {
-    return new Promise((resolve, reject) => {
-      this.wsClient.send(JSON.stringify(json), (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
-    });
-  }
-
   async close() {
     return new Promise((resolve, reject) => {
-      if (this.isConnected) {
+      if (this.wsClient && this.wsClient.readyState === WebSocket.OPEN) {
         try {
           this.wsClient.close();
           this.isConnected = false;
@@ -122,6 +141,7 @@ class Sprut {
         .then((loginCall) => {
           if (
             this._getNestedProperty(loginCall, [
+              "result",
               "account",
               "login",
               "question",
@@ -140,6 +160,7 @@ class Sprut {
               .then((passwordCall) => {
                 if (
                   this._getNestedProperty(passwordCall, [
+                    "result",
                     "account",
                     "answer",
                     "status",
@@ -150,7 +171,7 @@ class Sprut {
                   resolve({
                     isError: false,
                     result: {
-                      token: passwordCall.account.answer.token,
+                      token: passwordCall.result.account.answer.token,
                     },
                   });
                 }
@@ -200,7 +221,8 @@ class Sprut {
 
     // Execute the command
     try {
-      await this.call({
+      // TODO: Check for token expiration
+      const updateResult = await this.call({
         characteristic: {
           update: {
             aId: accessoryId,
@@ -212,8 +234,25 @@ class Sprut {
           },
         },
       });
-      this.log.info("Command executed successfully");
-      return 'success';
+
+      this.log.info(updateResult, "Command executed successfully");
+
+      if (updateResult.error) {
+        return {
+          isSuccess: false,
+          ...updateResult.error,
+        };
+      }
+
+      if (updateResult.result) {
+        return {
+          isSuccess: true,
+          code: 0,
+          message: "Success",
+        };
+      }
+
+      return updateResult;
     } catch (error) {
       this.log.error("Error executing command:", error);
       throw error; // Rethrow the error to be caught by the caller
