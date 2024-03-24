@@ -1,0 +1,42 @@
+{
+  "name": "sprut-http-bridge",
+  "version": "1.0.0",
+  "description": "A RESTful HTTP to WebSocket bridge for interacting with Sprut services.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublish": "npm run lint && npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shady2k/sprut-http-bridge.git"
+  },
+  "keywords": [
+    "sprut",
+    "http",
+    "websocket",
+    "bridge",
+    "api",
+    "rest"
+  ],
+  "author": "shady2k <shady2k@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shady2k/sprut-http-bridge/issues"
+  },
+  "homepage": "https://github.com/shady2k/sprut-http-bridge#readme",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "jest": "^28.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
