@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "NODE_ENV=development nodemon index.js",
     "test": "echo \"Error: no test specified\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -30,11 +31,15 @@
   "homepage": "https://github.com/shady2k/sprut-http-bridge#readme",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "fastify": "^4.26.2",
+    "install": "^0.13.0",
+    "npm": "^10.5.0",
     "ws": "^8.16.0"
   },
   "devDependencies": {
     "eslint": "^8.0.0",
-    "jest": "^28.0.0"
+    "jest": "^28.0.0",
+    "nodemon": "^3.1.0"
   },
   "engines": {
     "node": ">=14.0.0"
