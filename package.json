@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "NODE_ENV=development nodemon index.js",
-    "test": "echo \"Error: no test specified\"",
+    "test": "jest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublish": "npm run lint && npm run test"

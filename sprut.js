@@ -84,6 +84,18 @@ class Sprut {
     this.log.error("Spruthub error:", error);
   }
 
+  async connected() {
+    return new Promise((resolve) => {
+      if (this.isConnected) {
+        resolve();
+      } else {
+        this.wsClient.once("open", () => {
+          resolve();
+        });
+      }
+    });
+  }
+
   async call(json) {
     return new Promise((resolve, reject) => {
       const id = this.getNextId();
@@ -138,12 +150,20 @@ class Sprut {
 
   async close() {
     return new Promise((resolve, reject) => {
-      if (this.wsClient && this.wsClient.readyState === WebSocket.OPEN) {
+      if (this.wsClient) {
+        // Listen for the 'close' event
+        this.wsClient.once("close", () => {
+          // Once the 'close' event is emitted, resolve the promise
+          resolve();
+        });
+
+        // Attempt to close the WebSocket connection
         try {
           this.wsClient.close();
-          this.isConnected = false;
-          resolve();
         } catch (error) {
+          // If there is an error while closing, remove the 'close' event listener
+          // to prevent future resolutions and reject the promise
+          this.wsClient.removeListener("close", resolve);
           reject(error);
         }
       } else {
