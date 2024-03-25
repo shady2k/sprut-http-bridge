@@ -30,6 +30,8 @@
   },
   "homepage": "https://github.com/shady2k/sprut-http-bridge#readme",
   "dependencies": {
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
     "install": "^0.13.0",
