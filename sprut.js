@@ -70,20 +70,18 @@ class Sprut {
   }
 
   handleConnection() {
-    this.log.info("WebSocket connected");
+    this.log.info("Spruthub connected!");
     this.isConnected = true;
     // Implement initial request logic here
   }
 
   handleDisconnection() {
-    this.log.info("WebSocket connection closed");
+    this.log.info("Spruthub connection closed");
     this.isConnected = false;
-    // Implement reconnection logic here
   }
 
   handleError(error) {
-    this.log.error("WebSocket error:", error);
-    // Implement error handling logic here
+    this.log.error("Spruthub error:", error);
   }
 
   async call(json) {
