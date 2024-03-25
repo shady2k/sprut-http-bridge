@@ -75,31 +75,52 @@ class Sprut {
     // Implement error handling logic here
   }
 
-  call(json) {
+  async call(json) {
     return new Promise((resolve, reject) => {
       const id = this.getNextId();
       const payload = {
         jsonrpc: "2.0",
         params: json,
         id,
+        token: this.token,
+        serial: this.serial,
       };
-      if (this.token) {
-        payload.token = this.token;
-        payload.serial = this.serial;
-      }
 
       if (this.wsClient && this.wsClient.readyState === WebSocket.OPEN) {
         this.wsClient.send(JSON.stringify(payload), (error) => {
           if (error) {
             reject(error);
           } else {
-            this.queue.add(id, resolve);
+            this.queue.add(id, (response) => {
+              if (response.error && response.error.code === -666003) {
+                // Token is not valid, attempt retry with fresh token
+                this.retryCallWithFreshToken(json, resolve, reject);
+              } else {
+                resolve(response);
+              }
+            });
           }
         });
       } else {
         this.log.error("WebSocket is not open. Cannot send message.");
+        reject(new Error("WebSocket is not open"));
       }
     });
+  }
+
+  async retryCallWithFreshToken(json, resolve, reject) {
+    try {
+      const authResult = await this.auth();
+      if (authResult.isError) {
+        throw new Error("Authentication failed.");
+      }
+      this.token = authResult.result.token;
+      // Retry the original call with the new token
+      const retryResponse = await this.call(json);
+      resolve(retryResponse);
+    } catch (error) {
+      reject(error);
+    }
   }
 
   getNextId() {
