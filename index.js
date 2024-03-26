@@ -126,13 +126,11 @@ require("dotenv").config({ path: envFileName });
       host: process.env.LISTENING_HOST || "localhost",
       port: process.env.LISTENING_PORT || 3000,
     },
-    function (err, address) {
+    function (err) {
       if (err) {
         fastify.log.error(err);
         process.exit(1);
       }
-      // Server is now listening on ${address}
-      fastify.log.info(`Server listening on ${address}`);
     }
   );
 })();
