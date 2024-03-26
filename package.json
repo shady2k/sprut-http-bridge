@@ -4,7 +4,7 @@
   "description": "A RESTful HTTP to WebSocket bridge for interacting with Sprut services.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "NODE_ENV=production node index.js",
     "dev": "NODE_ENV=development nodemon index.js",
     "test": "jest",
     "lint": "eslint .",

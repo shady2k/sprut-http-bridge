@@ -43,7 +43,7 @@ class Sprut {
     this.queue = new Queue();
 
     if (!wsUrl || !sprutLogin || !sprutPassword || !serial) {
-      throw new Error("wsUrl, sprutLogin, sprutPassword, serial must be set");
+      throw new Error("wsUrl, sprutLogin, sprutPassword, serial must be set as env variables");
     }
     this.wsClient = new WebSocket(wsUrl);
     this.wsClient.on("open", () => this.handleConnection());

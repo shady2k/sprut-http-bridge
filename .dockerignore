@@ -1,0 +1,11 @@
+.env
+.env.*
+*.test.js
+jest.config.js
+coverage
+.eslintrc.js
+.git
+.gitignore
+.dockerignore
+.vscode
+Dockerfile
