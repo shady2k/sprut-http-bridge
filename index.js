@@ -77,8 +77,23 @@ require("dotenv").config({ path: envFileName });
           serviceId: { type: "number" },
           characteristicId: { type: "number" },
           value: { type: "boolean" },
-          result: { type: "string" },
+          result: {
+            type: "object",
+            properties: {
+              isSuccess: { type: "boolean" },
+              code: { type: "number" },
+              message: { type: "string" },
+            },
+            required: ["isSuccess", "code", "message"],
+          },
         },
+        required: [
+          "accessoryId",
+          "serviceId",
+          "characteristicId",
+          "value",
+          "result",
+        ],
       },
     },
   };
