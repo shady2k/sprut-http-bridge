@@ -118,6 +118,24 @@ describe("Sprut WebSocket Interactions", () => {
       value: false,
     });
 
-    expect(resultExecute).toMatchObject({ isSuccess: true, code: 0, message: 'Success' });
+    expect(resultExecute).toMatchObject({
+      isSuccess: true,
+      code: 0,
+      message: "Success",
+    });
   });
+
+  test("sprut reconnect", (done) => {
+    for (const ws of server.clients) {
+      ws.close();
+    }
+
+    setTimeout(async () => {
+      await sprut.connected();
+      expect(sprut.isConnected).toBe(true);
+      done()
+    }, 5000)
+  }, 7000);
+  // TODO: Check then execute command failed
+  // TODO: Check if login or password is wrong
 });

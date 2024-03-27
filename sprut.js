@@ -43,7 +43,9 @@ class Sprut {
     this.queue = new Queue();
 
     if (!wsUrl || !sprutLogin || !sprutPassword || !serial) {
-      throw new Error("wsUrl, sprutLogin, sprutPassword, serial must be set as env variables");
+      throw new Error(
+        "wsUrl, sprutLogin, sprutPassword, serial must be set as env variables"
+      );
     }
     this.wsClient = new WebSocket(wsUrl);
     this.wsClient.on("open", () => this.handleConnection());
@@ -76,8 +78,22 @@ class Sprut {
   }
 
   handleDisconnection() {
-    this.log.info("Spruthub connection closed");
+    this.log.info("Spruthub connection closed, trying to reconnect...");
     this.isConnected = false;
+
+    // Delay before attempting to reconnect
+    setTimeout(() => {
+      this.reconnect();
+    }, 5000); // 5 seconds delay
+  }
+
+  reconnect() {
+    this.log.info("Attempting to reconnect...");
+    this.wsClient = new WebSocket(this.wsUrl);
+    this.wsClient.on("open", () => this.handleConnection());
+    this.wsClient.on("message", (data) => this.onMessage(data));
+    this.wsClient.on("close", () => this.handleDisconnection());
+    this.wsClient.on("error", (error) => this.handleError(error));
   }
 
   handleError(error) {
@@ -89,9 +105,12 @@ class Sprut {
       if (this.isConnected) {
         resolve();
       } else {
-        this.wsClient.once("open", () => {
-          resolve();
-        });
+        const interval = setInterval(() => {
+          if (this.isConnected) {
+            resolve();
+            clearInterval(interval);
+          }
+        }, 100);
       }
     });
   }
