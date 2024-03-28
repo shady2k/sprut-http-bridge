@@ -41,6 +41,7 @@ class Sprut {
     this.isConnected = false;
     this.idCounter = 1;
     this.queue = new Queue();
+    this.isTerminated = false;
 
     if (!wsUrl || !sprutLogin || !sprutPassword || !serial) {
       throw new Error(
@@ -78,6 +79,10 @@ class Sprut {
   }
 
   handleDisconnection() {
+    if (this.isTerminated) {
+      this.log.info("Spruthub connection closed!");
+      return;
+    }
     this.log.info("Spruthub connection closed, trying to reconnect...");
     this.isConnected = false;
 
@@ -169,6 +174,7 @@ class Sprut {
 
   async close() {
     return new Promise((resolve, reject) => {
+      this.isTerminated = true;
       if (this.wsClient) {
         // Listen for the 'close' event
         this.wsClient.once("close", () => {

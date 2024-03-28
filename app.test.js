@@ -1,5 +1,9 @@
+"use strict";
+
+const build = require("./app");
 const { WebSocketServer } = require("ws");
-const Sprut = require("./sprut"); // Adjust the path as necessary
+
+let server;
 
 const responseRules = [
   {
@@ -54,13 +58,12 @@ const responseRules = [
   // Add more rules as needed...
 ];
 
-describe("Sprut WebSocket Interactions", () => {
-  let server;
-  let sprut;
+describe("POST /update", () => {
+  let app;
 
-  beforeAll(async () => {
+  beforeAll((done) => {
     // Start a mock WebSocket server
-    server = new WebSocketServer({ port: 1236 });
+    server = new WebSocketServer({ port: 1237 });
 
     server.on("connection", (ws) => {
       ws.on("message", (data) => {
@@ -78,68 +81,70 @@ describe("Sprut WebSocket Interactions", () => {
       });
     });
 
-    // Initialize Sprut with mock WebSocket URL
-    sprut = new Sprut({
-      wsUrl: "ws://localhost:1236",
-      sprutLogin: "testLogin",
-      sprutPassword: "testPassword",
-      serial: "testSerial",
-      logger: {
-        info: console.log,
-        debug: jest.fn(),
-        error: console.log,
-      },
+    app = build({
+      // Add any plugin options required for the test environment
     });
-
-    await sprut.connected();
-  });
-
-  afterAll((done) => {
-    sprut.close().then(() => {
-      for (const ws of server.clients) {
-        ws.close();
-      }
-      server.close();
+    app.ready().then(() => {
       setTimeout(() => done(), 1000);
     });
   });
 
-  test("handles WebSocket connection", async () => {
-    expect(sprut.isConnected).toBe(true);
+  afterAll((done) => {
+    app.close().then(() => {
+      for (const ws of server.clients) {
+        ws.close();
+      }
+      server.close();
+      setTimeout(() => done(), 1000)
+    });
   });
 
-  test("sprut auth", async () => {
-    const authResult = await sprut.auth();
-    expect(authResult.isError).toBe(false);
-    expect(authResult.result.token).toBe("testToken");
-  });
-
-  test("sprut execute command", async () => {
-    const resultExecute = await sprut.execute("update", {
+  test("should update an accessory successfully", async () => {
+    const updateData = {
       accessoryId: 167,
       serviceId: 13,
       characteristicId: 15,
-      value: false,
+      value: true,
+    };
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/update",
+      payload: updateData,
     });
 
-    expect(resultExecute).toMatchObject({
-      isSuccess: true,
-      code: 0,
-      message: "Success",
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      accessoryId: 167,
+      serviceId: 13,
+      characteristicId: 15,
+      value: true,
+      result: {
+        isSuccess: true,
+        code: 0,
+        message: expect.any(String),
+      },
     });
   });
 
-  test("sprut reconnect", (done) => {
-    for (const ws of server.clients) {
-      ws.close();
-    }
+  test("should handle errors gracefully", async () => {
+    // Assuming an invalid payload leads to an error
+    const invalidData = {
+      accessoryId: -1, // Invalid data for testing error handling
+    };
 
-    setTimeout(async () => {
-      await sprut.connected();
-      expect(sprut.isConnected).toBe(true);
-      done();
-    }, 5000);
-  }, 7000);
-  // TODO: Check then execute command failed
-  // TODO: Check if login or password is wrong
+    const response = await app.inject({
+      method: "POST",
+      url: "/update",
+      payload: invalidData,
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
+      code: "FST_ERR_VALIDATION",
+      error: "Bad Request",
+      message: "body must have required property 'serviceId'",
+      statusCode: 400,
+    });
+  });
 });
