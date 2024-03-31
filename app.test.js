@@ -61,7 +61,7 @@ const responseRules = [
 describe("POST /update", () => {
   let app;
 
-  beforeAll((done) => {
+  beforeAll(async () => {
     // Start a mock WebSocket server
     server = new WebSocketServer({ port: 1237 });
 
@@ -81,22 +81,20 @@ describe("POST /update", () => {
       });
     });
 
-    app = build({
+    app = await build({
       // Add any plugin options required for the test environment
     });
-    app.ready().then(() => {
-      setTimeout(() => done(), 1000);
-    });
+    await app.ready();
+    await app.sprut.connected();
   });
 
-  afterAll((done) => {
-    app.close().then(() => {
-      for (const ws of server.clients) {
-        ws.close();
-      }
-      server.close();
-      setTimeout(() => done(), 1000)
-    });
+  afterAll(async () => {
+    await app.close();
+
+    for (const ws of server.clients) {
+      ws.close();
+    }
+    server.close();
   });
 
   test("should update an accessory successfully", async () => {

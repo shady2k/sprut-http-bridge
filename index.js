@@ -35,19 +35,25 @@ const opts = {
 };
 
 // Building the Fastify application with the specified options
-const server = build(opts);
-
-// Start listening for incoming requests
-server.listen(
-  {
-    host: process.env.LISTENING_HOST || "localhost",
-    port: process.env.LISTENING_PORT || 3000,
-  },
-  (err, address) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
-    console.log(`Server listening at ${address}`);
+(async () => {
+  try {
+    const server = await build(opts); // Await the build function here
+    await server.ready(); // Wait for all plugins to be loaded
+    server.listen(
+      {
+        host: process.env.LISTENING_HOST || "localhost",
+        port: process.env.LISTENING_PORT || 3000,
+      },
+      (err, address) => {
+        if (err) {
+          console.error(err);
+          process.exit(1);
+        }
+        console.log(`Server listening at ${address}`);
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
   }
-);
+})();

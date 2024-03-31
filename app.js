@@ -4,7 +4,7 @@ const fastify = require("fastify");
 const updateSchema = require("./schemas/update");
 const versionSchema = require("./schemas/version");
 
-function build(opts = {}) {
+async function build(opts = {}) {
   const app = fastify(opts);
 
   // Register the dotenv as early as possible
@@ -12,9 +12,9 @@ function build(opts = {}) {
   require("dotenv").config({ path: envFileName });
 
   // Register plugins here
-  app.register(require("@fastify/swagger"));
+  await app.register(require("@fastify/swagger"));
 
-  app.register(require("@fastify/swagger-ui"), {
+  await app.register(require("@fastify/swagger-ui"), {
     routePrefix: "/",
     uiConfig: {
       docExpansion: "full",
@@ -44,6 +44,10 @@ function build(opts = {}) {
     logger: app.log,
   });
 
+  if(process.env.NODE_ENV === "test") {
+    app.decorate("sprut", sprut);
+  }
+
   // Route definitions
   app.post("/update", updateSchema, async (request, reply) => {
     try {
@@ -64,7 +68,7 @@ function build(opts = {}) {
     try {
       const result = await sprut.version();
       return {
-        result
+        result,
       };
     } catch (error) {
       app.log.error(error);
