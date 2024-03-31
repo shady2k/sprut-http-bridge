@@ -1,6 +1,8 @@
-'use strict';
+"use strict";
 
-const fastify = require('fastify');
+const fastify = require("fastify");
+const updateSchema = require("./schemas/update");
+const versionSchema = require("./schemas/version");
 
 function build(opts = {}) {
   const app = fastify(opts);
@@ -42,58 +44,27 @@ function build(opts = {}) {
     logger: app.log,
   });
 
-  // JSON Schema for the request body
-  const updateSchema = {
-    description: "Update an accessory",
-    tags: ["accessory"],
-    summary: "Updates the specified accessory",
-    body: {
-      type: "object",
-      properties: {
-        accessoryId: { type: "number" },
-        serviceId: { type: "number" },
-        characteristicId: { type: "number" },
-        value: { type: "boolean" },
-      },
-      required: ["accessoryId", "serviceId", "characteristicId", "value"],
-    },
-    response: {
-      200: {
-        description: "Successful response",
-        type: "object",
-        properties: {
-          accessoryId: { type: "number" },
-          serviceId: { type: "number" },
-          characteristicId: { type: "number" },
-          value: { type: "boolean" },
-          result: {
-            type: "object",
-            properties: {
-              isSuccess: { type: "boolean" },
-              code: { type: "number" },
-              message: { type: "string" },
-            },
-            required: ["isSuccess", "code", "message"],
-          },
-        },
-        required: [
-          "accessoryId",
-          "serviceId",
-          "characteristicId",
-          "value",
-          "result",
-        ],
-      },
-    },
-  };
-
   // Route definitions
-  app.post("/update", { schema: updateSchema }, async (request, reply) => {
+  app.post("/update", updateSchema, async (request, reply) => {
     try {
       const result = await sprut.execute("update", request.body);
       return {
         ...request.body,
         result,
+      };
+    } catch (error) {
+      app.log.error(error);
+      reply
+        .code(500)
+        .send({ error: "An error occurred while processing your request." });
+    }
+  });
+
+  app.get("/version", versionSchema, async (request, reply) => {
+    try {
+      const result = await sprut.version();
+      return {
+        result
       };
     } catch (error) {
       app.log.error(error);

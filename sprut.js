@@ -120,9 +120,23 @@ class Sprut {
     });
   }
 
+  async ensureConnectionAndAuthentication() {
+    if (!this.isConnected) {
+      throw new Error("Not connected");
+    }
+    if (!this.token) {
+      const authResult = await this.auth();
+      if (authResult.isError) {
+        throw new Error("Authentication failed.");
+      } else {
+        this.token = authResult.result.token;
+      }
+    }
+  }
+
   async call(json) {
     return new Promise((resolve, reject) => {
-      const id = this.getNextId();
+      const id = this.generateNextId();
       const payload = {
         jsonrpc: "2.0",
         params: json,
@@ -168,7 +182,7 @@ class Sprut {
     }
   }
 
-  getNextId() {
+  generateNextId() {
     return this.idCounter++;
   }
 
@@ -274,25 +288,7 @@ class Sprut {
       throw new Error("value must be set");
     }
 
-    // Ensure connection
-    if (!this.isConnected) {
-      throw new Error("Not connected");
-    }
-
-    // Authenticate if not already authenticated
-    if (!this.token) {
-      const authResult = await this.auth();
-      if (authResult.isError) {
-        throw new Error("Authentication failed.");
-      } else {
-        this.token = authResult.result.token;
-      }
-    }
-
-    // Ensure connection and authentication are successful
-    if (!this.isConnected || !this.token) {
-      throw new Error("Connection or authentication failed.");
-    }
+    await this.ensureConnectionAndAuthentication();
 
     // Execute the command
     try {
@@ -327,6 +323,42 @@ class Sprut {
       }
 
       return updateResult;
+    } catch (error) {
+      this.log.error("Error executing command:", error);
+      throw error; // Rethrow the error to be caught by the caller
+    }
+  }
+
+  async version() {
+    await this.ensureConnectionAndAuthentication();
+
+    // Execute the command
+    try {
+      const versionResult = await this.call({
+        server: {
+          version: {},
+        },
+      });
+
+      this.log.info(versionResult, "Command executed successfully");
+
+      if (versionResult.error) {
+        return {
+          isSuccess: false,
+          ...versionResult.error,
+        };
+      }
+
+      if (versionResult.result) {
+        return {
+          isSuccess: true,
+          code: 0,
+          message: "Success",
+          data: versionResult.result.server.version,
+        };
+      }
+
+      return versionResult;
     } catch (error) {
       this.log.error("Error executing command:", error);
       throw error; // Rethrow the error to be caught by the caller
