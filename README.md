@@ -1,54 +1,107 @@
-# sprut-http-bridge
+# Sprut HTTP Bridge
 
-A RESTful HTTP to WebSocket bridge for interacting with Spruthub.
+A RESTful HTTP to WebSocket bridge for interacting with Sprut services, enabling seamless communication between HTTP clients and Sprut's WebSocket-based smart home ecosystem.
 
-## Description
+## Caution
 
-This package provides a simple and efficient way to communicate with Spruthub via RESTful HTTP requests that are internally converted to WebSocket connections. It offers a user-friendly interface to interact with Sprut's WebSocket methods without dealing with the complexity of WebSocket communication.
+**Important:** Do not expose this service directly to the internet. Ensure that it is behind a firewall or use it within a secure network environment. Direct exposure can lead to unauthorized access and control of your connected devices.
 
 ## Features
 
-- Easy-to-use RESTful interface for WebSocket methods
-- Lightweight and minimal dependencies
+- **Easy setup:** Quick and straightforward setup process.
+- **Environment specific configuration:** Supports different configurations for development, production, and testing environments.
+- **Comprehensive logging:** Detailed and environment-specific logging for easier debugging and monitoring.
+- **Swagger UI integration:** Comes with integrated Swagger UI for exploring and testing the API endpoints.
+- **Robust WebSocket management:** Includes reconnection logic and message queue management for reliable communication with Sprut services.
 
 ## Getting Started
 
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+
+
 ### Prerequisites
 
-- Node.js (>=14.0.0)
+Node.js (version >=14.0.0)
 
-### Installation
+### Installing
 
-To install `sprut-http-bridge`, run the following command in your project directory:
+Clone the repository:
 
 ```bash
-npm install sprut-http-bridge
+
+git clone https://github.com/shady2k/sprut-http-bridge.git
+cd sprut-http-bridge
 ```
 
-### Usage
+Install NPM packages:
 
-After installation, you can require sprut-http-bridge in your project like this:
-
-
-```javascript
-const SprutHttpBridge = require('sprut-http-bridge');
-// Initialize and use the bridge here
+```bash
+npm install
 ```
 
-For more detailed usage instructions, refer to the documentation (Link to detailed API documentation).
+Set up your environment variables by creating .env files for your specific environment (development, production, test). Example for development:
+
+`.env.development`
+```bash
+NODE_ENV=development
+LISTENING_PORT=3000
+LISTENING_HOST=localhost
+WS_URL=your_websocket_url
+SPRUT_LOGIN=your_sprut_login
+SPRUT_PASSWORD=your_sprut_password
+SPRUT_SERIAL=your_sprut_serial
+```
+
+## Running
+
+### For development:
+
+```bash
+npm run dev
+```
+
+### For production:
+```bash
+npm start
+```
+
+## Docker Support
+
+To simplify deployment, you can use Docker. Here’s how you can use the provided Dockerfile:
+
+Build your Docker image:
+
+```bash
+docker build -t sprut-http-bridge .
+```
+
+Once the image is built, you can run it:
+```bash
+docker run -p 3000:3000 sprut-http-bridge
+```
+
+This will start the Sprut HTTP Bridge and expose it on port 3000 on your host.
+
+## Usage
+
+After starting the server, you can interact with the API using the following endpoints:
+
+`POST /update`
+
+Updates a device state. Requires device and state information in the request body.
+
+`GET /version`
+
+Returns the current version of the connected Sprut service.
+
+For detailed request and response models, visit the Swagger UI at /.
 
 
-### Running the Tests
+## Contributing
 
-To run the predefined test suite, use the following command:
+PRs are welcome.
 
-
-`npm test`
-
-### Contributing
-
-If you're interested in contributing to sprut-http-bridge, please read our contributing guidelines (Link to CONTRIBUTING.md).
 
 ### License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+This project is licensed under the MIT License - see the LICENSE.md file for details
