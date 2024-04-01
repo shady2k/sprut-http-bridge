@@ -1,5 +1,5 @@
 const { WebSocketServer } = require("ws");
-const Sprut = require("./sprut"); // Adjust the path as necessary
+const Sprut = require("./sprut");
 
 const responseRules = [
   {
@@ -39,19 +39,51 @@ const responseRules = [
     response: (message) => ({
       id: message.id,
       result: {
-        accessoryId: 167,
-        serviceId: 13,
-        characteristicId: 15,
-        value: false,
-        result: {
-          isSuccess: true,
-          code: 0,
-          message: "Success",
+        characteristic: {
+          update: {},
         },
       },
     }),
   },
-  // Add more rules as needed...
+  {
+    match: (message) => message.params?.server?.version,
+    response: (message) => ({
+      id: message.id,
+      result: {
+        server: {
+          version: {
+            timestamp: 1710699726,
+            lastBuildTime: 1710703222,
+            revision: 11847,
+            release: 11847,
+            beta: 11847,
+            test: 11911,
+            main: 3411,
+            early: 3411,
+            lastRevision: 11847,
+            lastMain: 3411,
+            lastEarly: 3411,
+            discovery: false,
+            platform: {
+              manufacturer: "IMAQLIQ",
+              model: "gbox-x3",
+              serial: "FFFFFFFFFFF",
+              mac: "AAAAAAAAAAA",
+              firmware: "20240309_1828_spruthub2",
+              jdk: "1.8.0_402 (Zulu 8.76.0.17-CA-linux_aarch64)",
+            },
+            branch: "release",
+            version: "1.9.10",
+            lastVersion: "1.9.10",
+            owner: "test@test.com",
+            manufacturer: "Sprut.hub",
+            model: "2",
+            serial: "DDDDDDDDDDDDDDDD",
+          },
+        },
+      },
+    }),
+  },
 ];
 
 describe("Sprut WebSocket Interactions", () => {
@@ -114,7 +146,7 @@ describe("Sprut WebSocket Interactions", () => {
     expect(authResult.result.token).toBe("testToken");
   });
 
-  test("sprut execute command", async () => {
+  test("sprut update command", async () => {
     const resultExecute = await sprut.execute("update", {
       accessoryId: 167,
       serviceId: 13,
@@ -126,6 +158,45 @@ describe("Sprut WebSocket Interactions", () => {
       isSuccess: true,
       code: 0,
       message: "Success",
+    });
+  });
+
+  test("sprut version command", async () => {
+    const resultExecute = await sprut.version();
+
+    expect(resultExecute).toMatchObject({
+      isSuccess: true,
+      code: 0,
+      message: "Success",
+      data: {
+        timestamp: 1710699726,
+        lastBuildTime: 1710703222,
+        revision: 11847,
+        release: 11847,
+        beta: 11847,
+        test: 11911,
+        main: 3411,
+        early: 3411,
+        lastRevision: 11847,
+        lastMain: 3411,
+        lastEarly: 3411,
+        discovery: false,
+        platform: {
+          manufacturer: "IMAQLIQ",
+          model: "gbox-x3",
+          serial: "FFFFFFFFFFF",
+          mac: "AAAAAAAAAAA",
+          firmware: "20240309_1828_spruthub2",
+          jdk: "1.8.0_402 (Zulu 8.76.0.17-CA-linux_aarch64)",
+        },
+        branch: "release",
+        version: "1.9.10",
+        lastVersion: "1.9.10",
+        owner: "test@test.com",
+        manufacturer: "Sprut.hub",
+        model: "2",
+        serial: "DDDDDDDDDDDDDDDD",
+      },
     });
   });
 
