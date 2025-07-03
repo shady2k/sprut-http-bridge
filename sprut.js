@@ -272,21 +272,23 @@ class Sprut {
     });
   }
 
-  async execute(command, { accessoryId, serviceId, characteristicId, value }) {
+  async execute(command, { accessoryId, serviceId, characteristicId, control }) {
     // Check if the command is allowed
     const commands = ["update"];
     if (!commands.includes(command)) {
       throw new Error("Command not allowed");
-    }
+    }  
 
     // Validate parameters
     if (!accessoryId || !serviceId || !characteristicId) {
       throw new Error("accessoryId, serviceId, characteristicId must be set");
     }
 
-    if (value !== true && value !== false) {
-      throw new Error("value must be set");
+    if (!control && control.value !== true && control.value !== false) {
+      throw new Error("control.value must be set");
     }
+    
+    const value = control.value;
 
     await this.ensureConnectionAndAuthentication();
 
@@ -298,11 +300,13 @@ class Sprut {
             aId: accessoryId,
             sId: serviceId,
             cId: characteristicId,
-            value: {
-              boolValue: value,
-            },
-          },
-        },
+            control: {
+              value: {
+                boolValue: value
+              }
+            }
+          }
+        }
       });
 
       this.log.info(updateResult, "Command executed successfully");

@@ -151,7 +151,9 @@ describe("Sprut WebSocket Interactions", () => {
       accessoryId: 167,
       serviceId: 13,
       characteristicId: 15,
-      value: false,
+      control: {
+        value: false
+      }
     });
 
     expect(resultExecute).toMatchObject({

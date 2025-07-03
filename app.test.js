@@ -46,7 +46,9 @@ const responseRules = [
         accessoryId: 167,
         serviceId: 13,
         characteristicId: 15,
-        value: false,
+        control: {
+          value: false,
+        },
         result: {
           isSuccess: true,
           code: 0,
@@ -102,7 +104,9 @@ describe("POST /update", () => {
       accessoryId: 167,
       serviceId: 13,
       characteristicId: 15,
-      value: true,
+      control: {
+        value: true
+      }
     };
 
     const response = await app.inject({
@@ -116,7 +120,6 @@ describe("POST /update", () => {
       accessoryId: 167,
       serviceId: 13,
       characteristicId: 15,
-      value: true,
       result: {
         isSuccess: true,
         code: 0,

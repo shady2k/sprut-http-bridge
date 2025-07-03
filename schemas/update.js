@@ -9,9 +9,15 @@ module.exports = {
         accessoryId: { type: "number" },
         serviceId: { type: "number" },
         characteristicId: { type: "number" },
-        value: { type: "boolean" },
+        control: {
+          type: "object",
+          properties: {
+            value: { type: "boolean" },
+          },
+          required: ["value"],
+        }
       },
-      required: ["accessoryId", "serviceId", "characteristicId", "value"],
+      required: ["accessoryId", "serviceId", "characteristicId", "control"],
     },
     response: {
       200: {
@@ -36,7 +42,7 @@ module.exports = {
           "accessoryId",
           "serviceId",
           "characteristicId",
-          "value",
+          "control",
           "result",
         ],
       },
