@@ -1,7 +1,7 @@
 {
   "name": "sprut-http-bridge",
-  "version": "1.0.2",
-  "description": "A RESTful HTTP to WebSocket bridge for interacting with Sprut services.",
+  "version": "1.0.3",
+  "description": "A RESTful HTTP to WebSocket bridge for interacting with Sprut services",
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production node index.js",
@@ -9,7 +9,8 @@
     "test": "NODE_ENV=test jest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublish": "npm run lint && npm run test"
+    "prepublish": "npm run lint && npm run test",
+    "docker:build": "docker buildx build --platform linux/arm/v7,linux/amd64 --push -t git.inside.shady2k.ru/images/spruthttpbridge:$npm_package_version ."
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "keywords": [
     "sprut",
+    "spruthub",
     "http",
     "websocket",
     "bridge",

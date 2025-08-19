@@ -28,8 +28,8 @@ async function build(opts = {}) {
         next();
       },
     },
-    staticCSP: true,
-    transformStaticCSP: (header) => header,
+    staticCSP: false,
+    transformStaticCSP: (header) => header.replace(/https:/g, 'http:'),
     transformSpecification: (swaggerObject) => swaggerObject,
     transformSpecificationClone: true,
   });
