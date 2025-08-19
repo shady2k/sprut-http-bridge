@@ -31,10 +31,10 @@ class Queue {
 
 class Sprut {
   constructor(opts) {
-    const { wsUrl, sprutLogin, sprutPassword, serial, logger } = opts;
+    const { wsUrl, sprutEmail, sprutPassword, serial, logger } = opts;
     this.log = logger;
     this.wsUrl = wsUrl;
-    this.sprutLogin = sprutLogin;
+    this.sprutEmail = sprutEmail;
     this.sprutPassword = sprutPassword;
     this.token = null;
     this.serial = serial;
@@ -43,9 +43,9 @@ class Sprut {
     this.queue = new Queue();
     this.isTerminated = false;
 
-    if (!wsUrl || !sprutLogin || !sprutPassword || !serial) {
+    if (!wsUrl || !sprutEmail || !sprutPassword || !serial) {
       throw new Error(
-        "wsUrl, sprutLogin, sprutPassword, serial must be set as env variables"
+        "wsUrl, sprutEmail, sprutPassword, serial must be set as env variables"
       );
     }
     this.wsClient = new WebSocket(wsUrl);
@@ -220,49 +220,80 @@ class Sprut {
 
   async auth() {
     return new Promise((resolve, reject) => {
+      // Step 1: Initial auth request
       this.call({
         account: {
-          login: {
-            login: this.sprutLogin,
+          auth: {
+            params: [],
           },
         },
       })
-        .then((loginCall) => {
+        .then((authCall) => {
           if (
-            this._getNestedProperty(loginCall, [
+            this._getNestedProperty(authCall, [
               "result",
               "account",
-              "login",
+              "auth",
+              "status",
+            ]) !== "ACCOUNT_RESPONSE_SUCCESS" ||
+            this._getNestedProperty(authCall, [
+              "result",
+              "account",
+              "auth",
               "question",
               "type",
-            ]) !== "QUESTION_TYPE_PASSWORD"
+            ]) !== "QUESTION_TYPE_EMAIL"
           ) {
-            reject(new Error("Expected password question type."));
+            reject(new Error("Expected email question type."));
           } else {
+            // Step 2: Send email
             this.call({
               account: {
                 answer: {
-                  data: this.sprutPassword,
+                  data: this.sprutEmail,
                 },
               },
             })
-              .then((passwordCall) => {
+              .then((emailCall) => {
                 if (
-                  this._getNestedProperty(passwordCall, [
+                  this._getNestedProperty(emailCall, [
                     "result",
                     "account",
                     "answer",
-                    "status",
-                  ]) !== "ACCOUNT_RESPONSE_SUCCESS"
+                    "question",
+                    "type",
+                  ]) !== "QUESTION_TYPE_PASSWORD"
                 ) {
-                  reject(new Error("Authentication failed."));
+                  reject(new Error("Expected password question type."));
                 } else {
-                  resolve({
-                    isError: false,
-                    result: {
-                      token: passwordCall.result.account.answer.token,
+                  // Step 3: Send password
+                  this.call({
+                    account: {
+                      answer: {
+                        data: this.sprutPassword,
+                      },
                     },
-                  });
+                  })
+                    .then((passwordCall) => {
+                      if (
+                        this._getNestedProperty(passwordCall, [
+                          "result",
+                          "account",
+                          "answer",
+                          "status",
+                        ]) !== "ACCOUNT_RESPONSE_SUCCESS"
+                      ) {
+                        reject(new Error("Authentication failed."));
+                      } else {
+                        resolve({
+                          isError: false,
+                          result: {
+                            token: passwordCall.result.account.answer.token,
+                          },
+                        });
+                      }
+                    })
+                    .catch(reject);
                 }
               })
               .catch(reject);

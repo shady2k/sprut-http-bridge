@@ -9,7 +9,7 @@ async function build(opts = {}) {
 
   // Register the dotenv as early as possible
   const envFileName = `.env.${process.env.NODE_ENV || "development"}`;
-  require("dotenv").config({ path: envFileName });
+  require("dotenv").config({ path: envFileName, override: true });
 
   // Register plugins here
   await app.register(require("@fastify/swagger"));
@@ -38,7 +38,7 @@ async function build(opts = {}) {
   const Sprut = require("./sprut.js");
   const sprut = new Sprut({
     wsUrl: process.env.WS_URL,
-    sprutLogin: process.env.SPRUT_LOGIN,
+    sprutEmail: process.env.SPRUT_EMAIL,
     sprutPassword: process.env.SPRUT_PASSWORD,
     serial: process.env.SPRUT_SERIAL,
     logger: app.log,

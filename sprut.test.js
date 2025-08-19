@@ -3,12 +3,32 @@ const Sprut = require("./sprut");
 
 const responseRules = [
   {
-    match: (message) => message.params?.account?.login?.login === "testLogin",
+    match: (message) => Array.isArray(message.params?.account?.auth?.params),
     response: (message) => ({
       id: message.id,
       result: {
         account: {
-          login: {
+          auth: {
+            status: "ACCOUNT_RESPONSE_SUCCESS",
+            question: {
+              type: "QUESTION_TYPE_EMAIL",
+            },
+            label: {
+              text: "Владелец - test***@**est.com",
+            },
+          },
+        },
+      },
+    }),
+  },
+  {
+    match: (message) =>
+      message.params?.account?.answer?.data === "testEmail",
+    response: (message) => ({
+      id: message.id,
+      result: {
+        account: {
+          answer: {
             question: {
               delay: 0,
               type: "QUESTION_TYPE_PASSWORD",
@@ -27,7 +47,6 @@ const responseRules = [
         account: {
           answer: {
             status: "ACCOUNT_RESPONSE_SUCCESS",
-            message: "Успешная авторизация",
             token: "testToken",
           },
         },
@@ -113,7 +132,7 @@ describe("Sprut WebSocket Interactions", () => {
     // Initialize Sprut with mock WebSocket URL
     sprut = new Sprut({
       wsUrl: "ws://localhost:1236",
-      sprutLogin: "testLogin",
+      sprutEmail: "testEmail",
       sprutPassword: "testPassword",
       serial: "testSerial",
       logger: {

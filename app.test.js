@@ -7,12 +7,32 @@ let server;
 
 const responseRules = [
   {
-    match: (message) => message.params?.account?.login?.login === "testLogin",
+    match: (message) => Array.isArray(message.params?.account?.auth?.params),
     response: (message) => ({
       id: message.id,
       result: {
         account: {
-          login: {
+          auth: {
+            status: "ACCOUNT_RESPONSE_SUCCESS",
+            question: {
+              type: "QUESTION_TYPE_EMAIL",
+            },
+            label: {
+              text: "Владелец - test***@**est.com",
+            },
+          },
+        },
+      },
+    }),
+  },
+  {
+    match: (message) =>
+      message.params?.account?.answer?.data === "testEmail",
+    response: (message) => ({
+      id: message.id,
+      result: {
+        account: {
+          answer: {
             question: {
               delay: 0,
               type: "QUESTION_TYPE_PASSWORD",
@@ -31,7 +51,6 @@ const responseRules = [
         account: {
           answer: {
             status: "ACCOUNT_RESPONSE_SUCCESS",
-            message: "Успешная авторизация",
             token: "testToken",
           },
         },
@@ -66,7 +85,6 @@ describe("POST /update", () => {
   beforeAll(async () => {
     // Start a mock WebSocket server
     server = new WebSocketServer({ port: 1237 });
-
     server.on("connection", (ws) => {
       ws.on("message", (data) => {
         const receivedMessage = JSON.parse(data);
@@ -88,6 +106,8 @@ describe("POST /update", () => {
     });
     await app.ready();
     await app.sprut.connected();
+    // Wait for authentication to complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   afterAll(async () => {
@@ -114,6 +134,7 @@ describe("POST /update", () => {
       url: "/update",
       payload: updateData,
     });
+
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
