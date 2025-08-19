@@ -9,16 +9,6 @@ A RESTful HTTP to WebSocket bridge for interacting with [Sprut Hub](https://spru
 
 **⚠️ Important:** Do not expose this service directly to the internet. Ensure that it is behind a firewall or use it within a secure network environment. Direct exposure can lead to unauthorized access and control of your connected devices.
 
-## ✨ Features
-
-- **🚀 Easy Setup** - Quick and straightforward installation process
-- **⚙️ Environment Configuration** - Supports different configurations for development, production, and testing
-- **📝 Comprehensive Logging** - Environment-specific logging with pino for debugging and monitoring
-- **📚 Swagger UI Integration** - Built-in API documentation and testing interface
-- **🔄 Robust WebSocket Management** - Automatic reconnection, token refresh, and message queuing
-- **🧪 Full Test Coverage** - Jest-based testing with comprehensive coverage reports
-- **🐳 Docker Support** - Ready-to-use Docker configuration for easy deployment
-
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -27,6 +17,26 @@ A RESTful HTTP to WebSocket bridge for interacting with [Sprut Hub](https://spru
 - **npm** (included with Node.js)
 
 ### Installation
+
+#### Method 1: Docker (Recommended)
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/shady2k/sprut-http-bridge:main
+
+# Create environment file from template
+cp .env .env.docker
+# Edit .env.docker with your Sprut credentials
+
+# Run the container
+docker run -d \
+  --name sprut-bridge \
+  -p 3000:3000 \
+  --env-file .env.docker \
+  ghcr.io/shady2k/sprut-http-bridge:main
+```
+
+#### Method 2: From Source
 
 1. **Clone the repository:**
    ```bash
@@ -78,24 +88,26 @@ npm run lint:fix  # Auto-fix ESLint issues
 
 ## 🐳 Docker Deployment
 
-### Build and Run
-```bash
-# Build the image
-docker build -t sprut-http-bridge .
+### Using Pre-built Images
 
-# Run the container
-docker run -d \
-  --name sprut-bridge \
-  -p 3000:3000 \
-  --env-file .env.production \
-  sprut-http-bridge
+Pre-built multi-architecture images are automatically built and published to GitHub Container Registry:
+
+```bash
+# Latest version from main branch
+docker pull ghcr.io/shady2k/sprut-http-bridge:main
+
+# Specific version (replace with actual version)
+docker pull ghcr.io/shady2k/sprut-http-bridge:v1.0.3
 ```
 
-### Multi-platform Build
+### Build Locally
 ```bash
+# Simple build
+npm run build
+
+# Multi-platform build (requires Docker Buildx)
 npm run docker:build
 ```
-*Builds for both ARM7 and AMD64 architectures*
 
 ## 📖 API Documentation
 
