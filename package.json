@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublish": "npm run lint && npm run test",
+    "build": "docker build -t sprut-http-bridge:$npm_package_version .",
     "docker:build": "docker buildx build --platform linux/arm/v7,linux/amd64 --push -t git.inside.shady2k.ru/images/spruthttpbridge:$npm_package_version ."
   },
   "repository": {
