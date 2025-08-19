@@ -1,107 +1,169 @@
 # Sprut HTTP Bridge
 
-A RESTful HTTP to WebSocket bridge for interacting with Sprut services, enabling seamless communication between HTTP clients and Sprut's WebSocket-based smart home ecosystem.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D14.0.0-green)](https://nodejs.org/)
 
-## Caution
+A RESTful HTTP to WebSocket bridge for interacting with [Sprut Hub](https://spruthub.ru/) services, enabling seamless communication between HTTP clients and Sprut's WebSocket-based smart home ecosystem.
 
-**Important:** Do not expose this service directly to the internet. Ensure that it is behind a firewall or use it within a secure network environment. Direct exposure can lead to unauthorized access and control of your connected devices.
+## 🔒 Security Notice
 
-## Features
+**⚠️ Important:** Do not expose this service directly to the internet. Ensure that it is behind a firewall or use it within a secure network environment. Direct exposure can lead to unauthorized access and control of your connected devices.
 
-- **Easy setup:** Quick and straightforward setup process.
-- **Environment specific configuration:** Supports different configurations for development, production, and testing environments.
-- **Comprehensive logging:** Detailed and environment-specific logging for easier debugging and monitoring.
-- **Swagger UI integration:** Comes with integrated Swagger UI for exploring and testing the API endpoints.
-- **Robust WebSocket management:** Includes reconnection logic and message queue management for reliable communication with Sprut services.
+## ✨ Features
 
-## Getting Started
+- **🚀 Easy Setup** - Quick and straightforward installation process
+- **⚙️ Environment Configuration** - Supports different configurations for development, production, and testing
+- **📝 Comprehensive Logging** - Environment-specific logging with pino for debugging and monitoring
+- **📚 Swagger UI Integration** - Built-in API documentation and testing interface
+- **🔄 Robust WebSocket Management** - Automatic reconnection, token refresh, and message queuing
+- **🧪 Full Test Coverage** - Jest-based testing with comprehensive coverage reports
+- **🐳 Docker Support** - Ready-to-use Docker configuration for easy deployment
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
+## 🚀 Quick Start
 
 ### Prerequisites
 
-Node.js (version >=14.0.0)
+- **Node.js** >= 14.0.0
+- **npm** (included with Node.js)
 
-### Installing
+### Installation
 
-Clone the repository:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/shady2k/sprut-http-bridge.git
+   cd sprut-http-bridge
+   ```
 
-```bash
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-git clone https://github.com/shady2k/sprut-http-bridge.git
-cd sprut-http-bridge
-```
+3. **Configure environment:**
+   Create environment-specific configuration files (`.env.development`, `.env.production`, `.env.test`):
 
-Install NPM packages:
+   **`.env.development` (example):**
+   ```env
+   NODE_ENV=development
+   LISTENING_PORT=3000
+   LISTENING_HOST=localhost
+   WS_URL=wss://your-sprut-server.com/ws
+   SPRUT_EMAIL=your-email@example.com
+   SPRUT_PASSWORD=your-password
+   SPRUT_SERIAL=your-device-serial
+   ```
 
-```bash
-npm install
-```
+   > **Note:** Replace `SPRUT_LOGIN` with `SPRUT_EMAIL` as per the current implementation
 
-Set up your environment variables by creating .env files for your specific environment (development, production, test). Example for development:
+## 🏃 Running the Application
 
-`.env.development`
-```bash
-NODE_ENV=development
-LISTENING_PORT=3000
-LISTENING_HOST=localhost
-WS_URL=your_websocket_url
-SPRUT_LOGIN=your_sprut_login
-SPRUT_PASSWORD=your_sprut_password
-SPRUT_SERIAL=your_sprut_serial
-```
-
-## Running
-
-### For development:
-
+### Development Mode
 ```bash
 npm run dev
 ```
+*Runs with nodemon for auto-restart and development-specific logging*
 
-### For production:
+### Production Mode
 ```bash
 npm start
 ```
+*Optimized for production with appropriate logging levels*
 
-## Docker Support
-
-To simplify deployment, you can use Docker. Here’s how you can use the provided Dockerfile:
-
-Build your Docker image:
-
+### Testing
 ```bash
+npm test          # Run Jest tests with coverage
+npm run lint      # ESLint code analysis  
+npm run lint:fix  # Auto-fix ESLint issues
+```
+
+## 🐳 Docker Deployment
+
+### Build and Run
+```bash
+# Build the image
 docker build -t sprut-http-bridge .
+
+# Run the container
+docker run -d \
+  --name sprut-bridge \
+  -p 3000:3000 \
+  --env-file .env.production \
+  sprut-http-bridge
 ```
 
-Once the image is built, you can run it:
+### Multi-platform Build
 ```bash
-docker run -p 3000:3000 sprut-http-bridge
+npm run docker:build
+```
+*Builds for both ARM7 and AMD64 architectures*
+
+## 📖 API Documentation
+
+Once the server is running, access the **interactive Swagger UI** at:
+```
+http://localhost:3000/
 ```
 
-This will start the Sprut HTTP Bridge and expose it on port 3000 on your host.
+### Available Endpoints
 
-## Usage
+#### `POST /update`
+Updates a device state in your Sprut smart home system.
 
-After starting the server, you can interact with the API using the following endpoints:
+**Request Body Example:**
+```json
+{
+  "accessoryId": "12345",
+  "serviceId": "67890",
+  "characteristicId": "abc123",
+  "value": true
+}
+```
 
-`POST /update`
+#### `GET /version`
+Returns the version information of the connected Sprut service.
 
-Updates a device state. Requires device and state information in the request body.
+**Response Example:**
+```json
+{
+  "version": "2.1.0",
+  "build": "12345"
+}
+```
 
-`GET /version`
+## 🏗️ Architecture
 
-Returns the current version of the connected Sprut service.
+- **Fastify HTTP Server** - High-performance web framework with built-in validation
+- **WebSocket Client** - Manages persistent connection to Sprut services
+- **Request Queue** - Handles async request/response mapping with timeouts  
+- **Auto-reconnection** - Automatic token refresh and connection recovery
+- **Environment-based Config** - Separate configurations for dev/prod/test
 
-For detailed request and response models, visit the Swagger UI at /.
+## 🔧 Environment Variables
 
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `NODE_ENV` | Application environment | `development`, `production`, `test` |
+| `LISTENING_PORT` | HTTP server port | `3000` |
+| `LISTENING_HOST` | HTTP server host | `localhost` |
+| `WS_URL` | Sprut WebSocket URL | `wss://sprut.example.com/ws` |
+| `SPRUT_EMAIL` | Authentication email | `user@example.com` |
+| `SPRUT_PASSWORD` | Authentication password | `your-password` |
+| `SPRUT_SERIAL` | Device serial number | `ABC123XYZ` |
 
-## Contributing
+## 🤝 Contributing
 
-PRs are welcome.
+Contributions are welcome! Please feel free to submit pull requests.
 
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### License
+## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+## 🐛 Issues & Support
+
+Found a bug or need help? Please [open an issue](https://github.com/shady2k/sprut-http-bridge/issues) on GitHub.
