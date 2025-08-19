@@ -10,6 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Linting:** `npm run lint` - ESLint code analysis
 - **Lint & fix:** `npm run lint:fix` - Auto-fix ESLint issues
 - **Pre-publish:** `npm run prepublish` - Runs lint and test before publishing
+- **Docker build:** `npm run build` - Builds Docker image with current package version tag
+- **Docker multi-platform build:** `npm run docker:build` - Builds and pushes multi-platform Docker image (ARM/AMD64)
 
 ## Architecture Overview
 
@@ -42,7 +44,7 @@ This is a **RESTful HTTP to WebSocket bridge** that enables communication betwee
 
 ### Environment Configuration
 
-Required environment variables (see `.env.example`):
+Required environment variables (see `.env`):
 - `WS_URL`: Sprut WebSocket server URL
 - `SPRUT_EMAIL`: Authentication email address
 - `SPRUT_PASSWORD`: Authentication password
