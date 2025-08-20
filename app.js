@@ -3,6 +3,10 @@
 const fastify = require("fastify");
 const updateSchema = require("./schemas/update");
 const versionSchema = require("./schemas/version");
+const hubsSchema = require("./schemas/hubs");
+const accessoriesSchema = require("./schemas/accessories");
+const roomsSchema = require("./schemas/rooms");
+const systemInfoSchema = require("./schemas/systemInfo");
 
 async function build(opts = {}) {
   const app = fastify(opts);
@@ -70,6 +74,61 @@ async function build(opts = {}) {
       return {
         result,
       };
+    } catch (error) {
+      app.log.error(error);
+      reply
+        .code(500)
+        .send({ error: "An error occurred while processing your request." });
+    }
+  });
+
+  app.get("/hubs", hubsSchema, async (request, reply) => {
+    try {
+      const result = await sprut.listHubs();
+      return {
+        result,
+      };
+    } catch (error) {
+      app.log.error(error);
+      reply
+        .code(500)
+        .send({ error: "An error occurred while processing your request." });
+    }
+  });
+
+  app.get("/accessories", accessoriesSchema, async (request, reply) => {
+    try {
+      const expand = request.query?.expand || "services,characteristics";
+      const result = await sprut.listAccessories(expand);
+      return {
+        result,
+      };
+    } catch (error) {
+      app.log.error(error);
+      reply
+        .code(500)
+        .send({ error: "An error occurred while processing your request." });
+    }
+  });
+
+  app.get("/rooms", roomsSchema, async (request, reply) => {
+    try {
+      const result = await sprut.listRooms();
+      return {
+        result,
+      };
+    } catch (error) {
+      app.log.error(error);
+      reply
+        .code(500)
+        .send({ error: "An error occurred while processing your request." });
+    }
+  });
+
+  app.get("/system-info", systemInfoSchema, async (request, reply) => {
+    try {
+      const result = await sprut.getFullSystemInfo();
+      return result;
     } catch (error) {
       app.log.error(error);
       reply
