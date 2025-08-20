@@ -22,17 +22,25 @@ This is a **RESTful HTTP to WebSocket bridge** that enables communication betwee
 1. **Fastify Application (`app.js`)**: Main HTTP server with Swagger UI integration
    - Handles `/update` POST requests for device state changes
    - Handles `/version` GET requests for server version info
+   - Handles `/hubs` GET requests for hub listing and status
+   - Handles `/accessories` GET requests for accessory listing (with optional expand parameter)
+   - Handles `/rooms` GET requests for room configuration
+   - Handles `/system-info` GET requests for comprehensive system overview
    - Uses environment-specific configuration and logging
 
 2. **Sprut WebSocket Client (`sprut.js`)**: Core WebSocket connection manager
    - **Queue class**: Manages async request/response mapping with timeouts
    - **Sprut class**: Handles authentication, connection management, and command execution
    - Implements automatic reconnection logic and token refresh
-   - Supports two main commands: `update` (device control) and `version` (server info)
+   - Supports multiple commands: `update` (device control), `version` (server info), `listHubs`, `listAccessories`, `listRooms`, and `getFullSystemInfo`
 
 3. **JSON Schemas (`schemas/`)**: Fastify request/response validation
    - `update.js`: Device control endpoint schema
    - `version.js`: Version endpoint response schema
+   - `hubs.js`: Hubs listing endpoint schema
+   - `accessories.js`: Accessories listing endpoint schema
+   - `rooms.js`: Rooms listing endpoint schema
+   - `systemInfo.js`: System information endpoint schema
 
 ### Key Patterns
 
@@ -58,6 +66,10 @@ The bridge communicates with Sprut using a JSON-RPC 2.0 style protocol:
 - Authentication flow: auth request → email challenge → password challenge → token
 - Device updates: `characteristic.update` with accessory/service/characteristic IDs
 - Server queries: `server.version` for version information
+- Hub management: `hub.list` for hub listing and status
+- Accessory management: `accessory.list` for device listing with optional expansion
+- Room management: `room.list` for room configuration
+- System overview: `system.getFullInfo` for comprehensive system information
 - All requests include token and serial for authorization
 
 ### Testing Strategy
