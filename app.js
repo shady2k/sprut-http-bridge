@@ -7,6 +7,7 @@ const hubsSchema = require("./schemas/hubs");
 const accessoriesSchema = require("./schemas/accessories");
 const roomsSchema = require("./schemas/rooms");
 const systemInfoSchema = require("./schemas/systemInfo");
+const scenarioGetSchema = require("./schemas/scenarios/get");
 
 async function build(opts = {}) {
   const app = fastify(opts);
@@ -128,6 +129,18 @@ async function build(opts = {}) {
   app.get("/system-info", systemInfoSchema, async (request, reply) => {
     try {
       const result = await sprut.getFullSystemInfo();
+      return result;
+    } catch (error) {
+      app.log.error(error);
+      reply
+        .code(500)
+        .send({ error: "An error occurred while processing your request." });
+    }
+  });
+
+  app.get("/scenarios/:id", scenarioGetSchema, async (request, reply) => {
+    try {
+      const result = await sprut.getScenario(request.params.id, request.query.expand || "data");
       return result;
     } catch (error) {
       app.log.error(error);

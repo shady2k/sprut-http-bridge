@@ -272,6 +272,30 @@ const responseRules = [
     })
   },
   {
+    match: (message) => message.params?.scenario?.get !== undefined,
+    response: (message) => ({
+      id: message.id,
+      result: {
+        isSuccess: true,
+        code: 0,
+        message: "Success",
+        data: {
+            order: 94,
+            type: "BLOCK",
+            predefined: false,
+            active: true,
+            onStart: true,
+            sync: false,
+            error: false,
+            index: "94",
+            name: "",
+            desc: "",
+            data: '{"blockId":0,"targets":[{"type":"if","blockId":1,"if":{"type":"condition","blockId":2,"mode":"OR","conditions":[]},"then":[],"then_delay":0,"else_delay":0,"mode":"EVERY"}]}'
+          }
+      }
+    })
+  },
+  {
     match: () => true,
     response: (message) => {
       console.log('UNMATCHED message:', JSON.stringify(message, null, 2));
@@ -702,6 +726,69 @@ describe("GET /system-info", () => {
     expect(result.rooms).toBeInstanceOf(Array);
     expect(result.controllableDevices).toBeInstanceOf(Array);
     expect(result.errors).toBeInstanceOf(Array);
+  });
+});
+
+describe("GET /scenario/:id", () => {
+  let app;
+
+  beforeAll(async () => {
+    server = new WebSocketServer({ port: 1237 });
+    server.on("connection", (ws) => {
+      ws.on("message", (data) => {
+        const receivedMessage = JSON.parse(data);
+        const rule = responseRules.find((rule) => rule.match(receivedMessage));
+        const response = rule
+          ? rule.response(receivedMessage)
+          : {
+              id: receivedMessage.id,
+              receivedMessage: JSON.stringify(receivedMessage),
+              error: "No matching rule for message",
+            };
+        ws.send(JSON.stringify(response));
+      });
+    });
+
+    app = await build();
+    await app.ready();
+    await app.sprut.connected();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  });
+
+  afterAll(async () => {
+    await app.close();
+    for (const ws of server.clients) {
+      ws.close();
+    }
+    server.close();
+  });
+
+  test("should get a scenario by id successfully", async () => {
+    const response = await app.inject({
+      method: "GET",
+      url: "/scenarios/94?expand=data",
+    });
+
+    expect(response.statusCode).toBe(200);
+    const result = response.json();
+    expect(result).toMatchObject({
+      isSuccess: true,
+      code: 0,
+      message: expect.any(String),
+      data: expect.objectContaining({
+        order: expect.any(Number),
+        type: expect.any(String),
+        predefined: expect.any(Boolean),
+        active: expect.any(Boolean),
+        onStart: expect.any(Boolean),
+        sync: expect.any(Boolean),
+        error: expect.any(Boolean),
+        index: expect.any(String),
+        name: expect.any(String),
+        desc: expect.any(String),
+        data: expect.any(String),
+      })
+    });
   });
 });
 
