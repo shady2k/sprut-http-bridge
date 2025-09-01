@@ -3,6 +3,24 @@
 const fastify = require("fastify");
 const Schema = require('/Users/shady/Documents/repos/spruthub-client/src/schemas/index.js');
 
+function findLeafProperties(schema) {
+  const leaves = {};
+  function recurse(obj) {
+    if (obj && obj.properties) {
+      for (const key in obj.properties) {
+        const prop = obj.properties[key];
+        if (prop.properties) {
+          Object.assign(leaves, recurse(prop));
+        } else {
+          leaves[key] = prop;
+        }
+      }
+    }
+    return leaves;
+  }
+  return recurse(schema);
+}
+
 async function build(opts = {}) {
   const app = fastify(opts);
 
@@ -42,16 +60,46 @@ async function build(opts = {}) {
     transformSpecificationClone: true,
   });
 
+  function constructNestedParams(flatParams, schema) {
+    const path = [];
+    let current = schema;
+    while (current && current.properties && Object.keys(current.properties).length === 1) {
+      const key = Object.keys(current.properties)[0];
+      path.push(key);
+      current = current.properties[key];
+    }
+
+    if (path.length === 0) {
+      return flatParams;
+    }
+
+    let result = {};
+    let nested = result;
+    for (let i = 0; i < path.length - 1; i++) {
+      nested = nested[path[i]] = {};
+    }
+
+    nested[path[path.length - 1]] = flatParams;
+    return result;
+  }
+
   // Completely dynamic handler - works with any method from schema
-  function createGenericHandler(methodName) {
+  function createGenericHandler(methodName, methodSchema) {
     return async (request, reply) => {
       try {
         // Build parameters based on HTTP request
-        const params = {
+        let params = {
           ...request.body,
           ...request.params,
           ...request.query
         };
+
+        if (request.method.toUpperCase() === 'GET' && methodSchema && methodSchema.params) {
+          const allParams = { ...request.params, ...request.query };
+          params = constructNestedParams(allParams, methodSchema.params);
+        }
+
+        app.log.debug({ params }, `Calling sprut.callMethod with params for ${methodName}`);
 
         // Call the method dynamically
         const response = await sprut.callMethod(methodName, params);
@@ -143,6 +191,26 @@ async function build(opts = {}) {
     }
 
 
+    // Add query string validation for GET methods
+    if (httpMethod.toUpperCase() === 'GET' && methodSchema.params) {
+      const pathParams = fastifySchema.params ? Object.keys(fastifySchema.params.properties) : [];
+      const allQuerystring = findLeafProperties(methodSchema.params);
+      const querystring = {};
+      for (const key in allQuerystring) {
+        if (!pathParams.includes(key)) {
+          querystring[key] = allQuerystring[key];
+        }
+      }
+
+      if (Object.keys(querystring).length > 0) {
+        fastifySchema.querystring = {
+          type: 'object',
+          properties: querystring
+        };
+      }
+    }
+
+
     // Add body validation for POST/PUT/PATCH methods
     if (['POST', 'PUT', 'PATCH'].includes(httpMethod.toUpperCase()) && methodSchema.params) {
       fastifySchema.body = methodSchema.params;
@@ -156,7 +224,7 @@ async function build(opts = {}) {
     }
 
     // Register the route with generic handler
-    const handler = createGenericHandler(methodName);
+    const handler = createGenericHandler(methodName, methodSchema);
     app[httpMethod.toLowerCase()](path, { schema: fastifySchema }, handler);
     app.log.info(`Registered ${httpMethod} ${path} -> ${methodName}`);
   });
