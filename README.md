@@ -97,7 +97,7 @@ Pre-built multi-architecture images are automatically built and published to Git
 docker pull ghcr.io/shady2k/sprut-http-bridge:main
 
 # Specific version (replace with actual version)
-docker pull ghcr.io/shady2k/sprut-http-bridge:v1.0.3
+docker pull ghcr.io/shady2k/sprut-http-bridge:v1.0.4
 ```
 
 ### Build Locally
@@ -116,38 +116,14 @@ Once the server is running, access the **interactive Swagger UI** at:
 http://localhost:3000/
 ```
 
-### Available Endpoints
-
-#### `POST /update`
-Updates a device state in your Sprut smart home system.
-
-**Request Body Example:**
-```json
-{
-  "accessoryId": "12345",
-  "serviceId": "67890",
-  "characteristicId": "abc123",
-  "value": true
-}
-```
-
-#### `GET /version`
-Returns the version information of the connected Sprut service.
-
-**Response Example:**
-```json
-{
-  "version": "2.1.0",
-  "build": "12345"
-}
-```
+The API provides dynamic endpoints based on the Sprut Hub service capabilities. All available endpoints and their documentation are accessible through the Swagger interface.
 
 ## 🏗️ Architecture
 
 - **Fastify HTTP Server** - High-performance web framework with built-in validation
-- **WebSocket Client** - Manages persistent connection to Sprut services
-- **Request Queue** - Handles async request/response mapping with timeouts  
-- **Auto-reconnection** - Automatic token refresh and connection recovery
+- **Dynamic API Generation** - Automatically generates REST endpoints from Sprut Hub client schemas
+- **Swagger Integration** - Interactive API documentation with automatic schema validation
+- **WebSocket Bridge** - Seamless HTTP-to-WebSocket communication with Sprut services
 - **Environment-based Config** - Separate configurations for dev/prod/test
 
 ## 🔧 Environment Variables
