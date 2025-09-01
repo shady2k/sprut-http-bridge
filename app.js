@@ -34,7 +34,7 @@ async function build(opts = {}) {
       info: {
         title: 'Sprut.hub HTTP Bridge',
         description: 'A RESTful HTTP to WebSocket bridge for interacting with Sprut services',
-        version: '1.0.4'
+        version: '1.0.5'
       },
       definitions: Schema.schema.definitions,
     }
@@ -47,10 +47,10 @@ async function build(opts = {}) {
       deepLinking: false,
     },
     uiHooks: {
-      onRequest: function (request, reply, next) {
+      onRequest: function (_request, _reply, next) {
         next();
       },
-      preHandler: function (request, reply, next) {
+      preHandler: function (_request, _reply, next) {
         next();
       },
     },
@@ -61,6 +61,7 @@ async function build(opts = {}) {
   });
 
   function constructNestedParams(flatParams, schema) {
+    // Discover the single-key nesting path (e.g., room -> get -> id)
     const path = [];
     let current = schema;
     while (current && current.properties && Object.keys(current.properties).length === 1) {
@@ -73,13 +74,35 @@ async function build(opts = {}) {
       return flatParams;
     }
 
-    let result = {};
+    // Build the nested envelope according to discovered path
+    const result = {};
     let nested = result;
     for (let i = 0; i < path.length - 1; i++) {
       nested = nested[path[i]] = {};
     }
 
-    nested[path[path.length - 1]] = flatParams;
+    const lastKey = path[path.length - 1];
+
+    // If the leaf schema is a primitive (no properties), avoid wrapping { id: { id: value } }
+    // and place the primitive directly. Also coerce number/integer types accordingly.
+    const isPrimitiveLeaf = !current || !current.properties;
+    if (isPrimitiveLeaf) {
+      let value = flatParams[lastKey];
+      if (value !== undefined && value !== null) {
+        const t = current && current.type;
+        if ((t === 'number' || t === 'integer') && typeof value === 'string' && /^-?\d+(?:\.\d+)?$/.test(value)) {
+          value = t === 'integer' ? parseInt(value, 10) : parseFloat(value);
+        } else if (t === 'boolean' && typeof value === 'string') {
+          if (value.toLowerCase() === 'true') value = true;
+          else if (value.toLowerCase() === 'false') value = false;
+        }
+      }
+      nested[lastKey] = value;
+    } else {
+      // Otherwise, attach the collected flat params as the object under the last key
+      nested[lastKey] = flatParams;
+    }
+
     return result;
   }
 
