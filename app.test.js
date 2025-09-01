@@ -62,17 +62,9 @@ const responseRules = [
     response: (message) => ({
       id: message.id,
       result: {
-        accessoryId: 167,
-        serviceId: 13,
-        characteristicId: 15,
-        control: {
-          value: false,
-        },
-        result: {
-          isSuccess: true,
-          code: 0,
-          message: "Success",
-        },
+        isSuccess: true,
+        code: 0,
+        message: "Success",
       },
     }),
   },
@@ -81,33 +73,13 @@ const responseRules = [
     response: (message) => ({
       id: message.id,
       result: {
-        server: {
-          version: {
-            revision: 1234,
-            release: 5,
-            beta: 0,
-            test: 0,
-            main: 2,
-            early: 0,
-            lastRevision: 1200,
-            lastMain: 1,
-            lastEarly: 0,
-            discovery: true,
-            platform: {
-              manufacturer: "Sprut Tech",
-              model: "Hub Pro",
-              serial: "SP123456",
-              mac: "AA:BB:CC:DD:EE:FF",
-              jdk: "11.0.1"
-            },
-            branch: "main",
-            version: "2.5.1234",
-            lastVersion: "2.1.1200",
-            owner: "Test Owner",
-            manufacturer: "Sprut Tech",
-            model: "Hub Pro",
-            serial: "SP123456"
-          }
+        isSuccess: true,
+        code: 0,
+        message: "Success",
+        data: {
+          revision: 1234,
+          version: "2.5.1234",
+          platform: "Sprut Tech Hub Pro"
         }
       }
     })
@@ -117,35 +89,24 @@ const responseRules = [
     response: (message) => ({
       id: message.id,
       result: {
-        hub: {
-          list: {
-            hubs: [
-              {
-                id: "hub-001",
-                name: "Main Hub",
-                version: {
-                  revision: 1234,
-                  release: 5,
-                  beta: 0,
-                  test: 0,
-                  main: 2,
-                  early: 0,
-                  version: "2.5.1234",
-                  branch: "main"
-                },
-                platform: {
-                  manufacturer: "Sprut Tech",
-                  model: "Hub Pro",
-                  serial: "SP123456",
-                  mac: "AA:BB:CC:DD:EE:FF",
-                  jdk: "11.0.1"
-                },
-                online: true,
-                lastSeen: "2024-01-15T10:30:00Z"
-              }
-            ]
+        isSuccess: true,
+        code: 0,
+        message: "Success",
+        data: [
+          {
+            id: "hub-001",
+            name: "Main Hub",
+            version: {
+              revision: 1234,
+              version: "2.5.1234",
+            },
+            platform: {
+              manufacturer: "Sprut Tech",
+              model: "Hub Pro",
+            },
+            online: true,
           }
-        }
+        ]
       }
     })
   },
@@ -154,40 +115,39 @@ const responseRules = [
     response: (message) => ({
       id: message.id,
       result: {
-        accessory: {
-          list: {
-            accessories: [
+        isSuccess: true,
+        code: 0,
+        message: "Success",
+        data: [
+          {
+            id: 167,
+            name: "Living Room Light",
+            manufacturer: "Philips",
+            model: "Hue Bulb",
+            online: true,
+            roomId: 1,
+            services: [
               {
-                id: 167,
-                name: "Living Room Light",
-                manufacturer: "Philips",
-                model: "Hue Bulb",
-                online: true,
-                roomId: 1,
-                services: [
+                sId: 13,
+                name: "Lightbulb Service",
+                type: "public.hap.service.lightbulb",
+                characteristics: [
                   {
-                    sId: 13,
-                    name: "Lightbulb Service",
-                    type: "public.hap.service.lightbulb",
-                    characteristics: [
-                      {
-                        cId: 15,
-                        control: {
-                          name: "On",
-                          type: "public.hap.characteristic.on",
-                          value: false,
-                          write: true,
-                          read: true,
-                          events: true
-                        }
-                      }
-                    ]
+                    cId: 15,
+                    control: {
+                      name: "On",
+                      type: "public.hap.characteristic.on",
+                      value: false,
+                      write: true,
+                      read: true,
+                      events: true
+                    }
                   }
                 ]
               }
             ]
           }
-        }
+        ]
       }
     })
   },
@@ -196,24 +156,21 @@ const responseRules = [
     response: (message) => ({
       id: message.id,
       result: {
-        room: {
-          list: {
-            rooms: [
-              {
-                id: 1,
-                name: "Living Room",
-                visible: true,
-                order: 1
-              },
-              {
-                id: 2,
-                name: "Kitchen",
-                visible: true,
-                order: 2
-              }
-            ]
+        isSuccess: true,
+        code: 0,
+        message: "Success",
+        data: [
+          {
+            id: 1,
+            name: "Living Room",
+            visible: true,
+          },
+          {
+            id: 2,
+            name: "Kitchen",
+            visible: true,
           }
-        }
+        ]
       }
     })
   },
@@ -280,18 +237,18 @@ const responseRules = [
         code: 0,
         message: "Success",
         data: {
-            order: 94,
-            type: "BLOCK",
-            predefined: false,
-            active: true,
-            onStart: true,
-            sync: false,
-            error: false,
-            index: "94",
-            name: "",
-            desc: "",
-            data: '{"blockId":0,"targets":[{"type":"if","blockId":1,"if":{"type":"condition","blockId":2,"mode":"OR","conditions":[]},"then":[],"then_delay":0,"else_delay":0,"mode":"EVERY"}]}'
-          }
+          order: 94,
+          type: "BLOCK",
+          predefined: false,
+          active: true,
+          onStart: true,
+          sync: false,
+          error: false,
+          index: "94",
+          name: "",
+          desc: "",
+          data: '{"blockId":0,"targets":[{"type":"if","blockId":1,"if":{"type":"condition","blockId":2,"mode":"OR","conditions":[]},"then":[],"then_delay":0,"else_delay":0,"mode":"EVERY"}]}'
+        }
       }
     })
   },
@@ -349,11 +306,15 @@ describe("POST /update", () => {
 
   test("should update an accessory successfully", async () => {
     const updateData = {
-      accessoryId: 167,
-      serviceId: 13,
-      characteristicId: 15,
-      control: {
-        value: true
+      characteristic: {
+        update: {
+          aId: 167,
+          sId: 13,
+          cId: 15,
+          control: {
+            value: { boolValue: true }
+          }
+        }
       }
     };
 
@@ -363,12 +324,18 @@ describe("POST /update", () => {
       payload: updateData,
     });
 
-
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
-      accessoryId: 167,
-      serviceId: 13,
-      characteristicId: 15,
+      characteristic: {
+        update: {
+          aId: 167,
+          sId: 13,
+          cId: 15,
+          control: {
+            value: { boolValue: true }
+          }
+        }
+      },
       result: {
         isSuccess: true,
         code: 0,
@@ -378,9 +345,13 @@ describe("POST /update", () => {
   });
 
   test("should handle errors gracefully", async () => {
-    // Assuming an invalid payload leads to an error
+    // Invalid payload missing required fields
     const invalidData = {
-      accessoryId: -1, // Invalid data for testing error handling
+      characteristic: {
+        update: {
+          aId: -1, // Invalid data for testing error handling
+        }
+      }
     };
 
     const response = await app.inject({
@@ -393,7 +364,7 @@ describe("POST /update", () => {
     expect(response.json()).toEqual({
       code: "FST_ERR_VALIDATION",
       error: "Bad Request",
-      message: "body must have required property 'serviceId'",
+      message: expect.stringMatching(/must have required property/),
       statusCode: 400,
     });
   });
@@ -443,19 +414,9 @@ describe("GET /version", () => {
     const result = response.json();
     expect(result).toHaveProperty("result");
     expect(result.result).toMatchObject({
-      isSuccess: true,
-      code: 0,
-      message: expect.any(String),
-      data: expect.objectContaining({
-        revision: expect.any(Number),
-        release: expect.any(Number),
-        version: expect.any(String),
-        platform: expect.objectContaining({
-          manufacturer: expect.any(String),
-          model: expect.any(String),
-          serial: expect.any(String)
-        })
-      })
+      revision: expect.any(Number),
+      version: expect.any(String),
+      platform: expect.any(String)
     });
   });
 });
@@ -503,11 +464,9 @@ describe("GET /hubs", () => {
     expect(response.statusCode).toBe(200);
     const result = response.json();
     expect(result).toHaveProperty("result");
-    expect(result.result).toMatchObject({
-      isSuccess: true,
-      code: 0,
-      message: expect.any(String),
-      data: expect.arrayContaining([
+    expect(result.result).toBeInstanceOf(Array);
+    expect(result.result).toEqual(
+      expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
           name: expect.any(String),
@@ -522,7 +481,7 @@ describe("GET /hubs", () => {
           })
         })
       ])
-    });
+    );
   });
 });
 
@@ -569,11 +528,9 @@ describe("GET /accessories", () => {
     expect(response.statusCode).toBe(200);
     const result = response.json();
     expect(result).toHaveProperty("result");
-    expect(result.result).toMatchObject({
-      isSuccess: true,
-      code: 0,
-      message: expect.any(String),
-      data: expect.arrayContaining([
+    expect(result.result).toBeInstanceOf(Array);
+    expect(result.result).toEqual(
+      expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(Number),
           name: expect.any(String),
@@ -591,7 +548,7 @@ describe("GET /accessories", () => {
           ])
         })
       ])
-    });
+    );
   });
 
   test("should handle expand query parameter", async () => {
@@ -603,7 +560,7 @@ describe("GET /accessories", () => {
     expect(response.statusCode).toBe(200);
     const result = response.json();
     expect(result).toHaveProperty("result");
-    expect(result.result.data).toBeInstanceOf(Array);
+    expect(result.result).toBeInstanceOf(Array);
   });
 });
 
@@ -650,21 +607,9 @@ describe("GET /rooms", () => {
     expect(response.statusCode).toBe(200);
     const result = response.json();
     expect(result).toHaveProperty("result");
-    expect(result.result).toMatchObject({
-      isSuccess: true,
-      code: 0,
-      message: expect.any(String),
-      data: expect.arrayContaining([
-        expect.objectContaining({
-          id: expect.any(Number),
-          name: expect.any(String),
-          visible: expect.any(Boolean)
-        })
-      ])
-    });
-    
-    expect(result.result.data).toHaveLength(2);
-    expect(result.result.data[0]).toMatchObject({
+    expect(result.result).toBeInstanceOf(Array);
+    expect(result.result).toHaveLength(2);
+    expect(result.result[0]).toMatchObject({
       id: 1,
       name: "Living Room",
       visible: true
@@ -771,23 +716,19 @@ describe("GET /scenario/:id", () => {
 
     expect(response.statusCode).toBe(200);
     const result = response.json();
-    expect(result).toMatchObject({
-      isSuccess: true,
-      code: 0,
-      message: expect.any(String),
-      data: expect.objectContaining({
-        order: expect.any(Number),
-        type: expect.any(String),
-        predefined: expect.any(Boolean),
-        active: expect.any(Boolean),
-        onStart: expect.any(Boolean),
-        sync: expect.any(Boolean),
-        error: expect.any(Boolean),
-        index: expect.any(String),
-        name: expect.any(String),
-        desc: expect.any(String),
-        data: expect.any(String),
-      })
+    expect(result).toHaveProperty("result");
+    expect(result.result).toMatchObject({
+      order: expect.any(Number),
+      type: expect.any(String),
+      predefined: expect.any(Boolean),
+      active: expect.any(Boolean),
+      onStart: expect.any(Boolean),
+      sync: expect.any(Boolean),
+      error: expect.any(Boolean),
+      index: expect.any(String),
+      name: expect.any(String),
+      desc: expect.any(String),
+      data: expect.any(String),
     });
   });
 });
@@ -836,27 +777,23 @@ describe("Error handling", () => {
 
   test("should handle server errors gracefully for all endpoints", async () => {
     const endpoints = [
-      { method: "GET", url: "/version" },
-      { method: "GET", url: "/hubs" },
-      { method: "GET", url: "/accessories" },
-      { method: "GET", url: "/rooms" },
-      { method: "GET", url: "/system-info" }
+      { method: "GET", url: "/version", sprutMethod: "version" },
+      { method: "GET", url: "/hubs", sprutMethod: "listHubs" },
+      { method: "GET", url: "/accessories", sprutMethod: "listAccessories" },
+      { method: "GET", url: "/rooms", sprutMethod: "listRooms" },
+      { method: "GET", url: "/system-info", sprutMethod: "getFullSystemInfo" }
     ];
 
     for (const endpoint of endpoints) {
-      const originalMethod = app.sprut[endpoint.url.replace('/', '').replace('-', '').replace('system-info', 'getFullSystemInfo').replace('accessories', 'listAccessories').replace('hubs', 'listHubs').replace('rooms', 'listRooms').replace('version', 'version')];
+      const mockError = jest.spyOn(app.sprut, endpoint.sprutMethod).mockRejectedValueOnce(new Error("Mock error"));
       
-      if (originalMethod) {
-        const mockError = jest.spyOn(app.sprut, endpoint.url.replace('/', '').replace('-', '').replace('systeminfo', 'getFullSystemInfo').replace('accessories', 'listAccessories').replace('hubs', 'listHubs').replace('rooms', 'listRooms').replace('version', 'version')).mockRejectedValueOnce(new Error("Mock error"));
-        
-        const response = await app.inject(endpoint);
-        expect(response.statusCode).toBe(500);
-        expect(response.json()).toMatchObject({
-          error: "An error occurred while processing your request."
-        });
-        
-        mockError.mockRestore();
-      }
+      const response = await app.inject(endpoint);
+      expect(response.statusCode).toBe(500);
+      expect(response.json()).toMatchObject({
+        error: "An error occurred while processing your request."
+      });
+      
+      mockError.mockRestore();
     }
   });
 });
