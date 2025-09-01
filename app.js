@@ -25,7 +25,7 @@ async function build(opts = {}) {
   await app.register(require("@fastify/swagger-ui"), {
     routePrefix: "/",
     uiConfig: {
-      docExpansion: "full",
+      docExpansion: "none",
       deepLinking: false,
     },
     uiHooks: {
@@ -142,17 +142,18 @@ async function build(opts = {}) {
       }
     }
 
-    // Add querystring support for all methods
-    fastifySchema.querystring = {
-      type: 'object',
-      properties: {
-        expand: {
-          type: 'string',
-          description: 'Comma-separated list of properties to expand'
+
+    // Add body validation for POST/PUT/PATCH methods
+    if (['POST', 'PUT', 'PATCH'].includes(httpMethod.toUpperCase()) && methodSchema.params) {
+      fastifySchema.body = methodSchema.params;
+      
+      // Include definitions for body if schema has $ref references
+      if (JSON.stringify(methodSchema.params).includes('$ref')) {
+        if (!fastifySchema.body.definitions) {
+          fastifySchema.body.definitions = Schema.schema.definitions;
         }
       }
-    };
-
+    }
 
     // Register the route with generic handler
     const handler = createGenericHandler(methodName);
