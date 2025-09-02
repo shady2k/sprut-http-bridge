@@ -1,7 +1,7 @@
 "use strict";
 
 const fastify = require("fastify");
-const Schema = require('/Users/shady/Documents/repos/spruthub-client/src/schemas/index.js');
+const { Schema } = require('spruthub-client');
 
 function findLeafProperties(schema) {
   const leaves = {};
