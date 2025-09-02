@@ -97,7 +97,7 @@ Pre-built multi-architecture images are automatically built and published to Git
 docker pull ghcr.io/shady2k/sprut-http-bridge:main
 
 # Specific version (replace with actual version)
-docker pull ghcr.io/shady2k/sprut-http-bridge:v1.0.4
+docker pull ghcr.io/shady2k/sprut-http-bridge:v1.0.6
 ```
 
 ### Build Locally
