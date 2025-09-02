@@ -1,6 +1,6 @@
 "use strict";
 
-const build = require("./app");
+const build = require("../app");
 const { WebSocketServer } = require("ws");
 
 const responseRules = [
