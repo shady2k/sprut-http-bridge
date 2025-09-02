@@ -34,7 +34,7 @@ async function build(opts = {}) {
       info: {
         title: 'Sprut.hub HTTP Bridge',
         description: 'A RESTful HTTP to WebSocket bridge for interacting with Sprut services',
-        version: '1.0.5'
+        version: require('./package.json').version
       },
       definitions: Schema.schema.definitions,
     }
