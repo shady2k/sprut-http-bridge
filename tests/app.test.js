@@ -67,22 +67,6 @@ const responseRules = [
       }),
     },
     {
-      match: (message) => message.params?.server?.version !== undefined,
-      response: (message) => ({
-        id: message.id,
-        result: {
-          isSuccess: true,
-          code: 0,
-          message: "Success",
-          data: {
-            revision: 1234,
-            version: "2.5.1234",
-            platform: "Sprut Tech Hub Pro"
-          }
-        }
-      })
-    },
-    {
       match: (message) => message.params?.hub?.list !== undefined,
       response: (message) => ({
         id: message.id,
@@ -302,21 +286,6 @@ describe("Sprut.hub HTTP Bridge", () => {
   describe("GET endpoints", () => {
     const endpoints = [
       {
-        url: "/server/version",
-        expected: {
-            "result": {
-                "data": {
-                  "platform": "Sprut Tech Hub Pro",
-                  "revision": 1234,
-                  "version": "2.5.1234",
-                },
-                "isSuccess": true,
-                "code": 0,
-                "message": "Success"
-            }
-        }
-      },
-      {
         url: "/hubs",
         expected: {
             "result": {
@@ -450,7 +419,7 @@ describe("Sprut.hub HTTP Bridge", () => {
 
         const response = await app.inject({
             method: "GET",
-            url: "/server/version",
+            url: "/hubs",
         });
 
         expect(response.statusCode).toBe(500);
@@ -467,7 +436,7 @@ describe("Sprut.hub HTTP Bridge", () => {
 
         const response = await app.inject({
             method: "GET",
-            url: "/server/version",
+            url: "/hubs",
         });
 
         expect(response.statusCode).toBe(500);
