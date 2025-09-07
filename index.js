@@ -22,9 +22,6 @@ const envToLogger = {
   },
   production: {
     level: "info",
-    transport: {
-      target: "pino-pretty",
-    },
   },
   test: false, // Assuming you might not need logging for tests, adjust as necessary
 };
