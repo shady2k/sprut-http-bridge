@@ -1,7 +1,7 @@
 {
   "name": "sprut-http-bridge",
-  "version": "1.0.9",
-  "description": "A RESTful HTTP to WebSocket bridge for interacting with Sprut services",
+  "version": "1.0.10",
+  "description": "A RESTful HTTP to WebSocket bridge for interacting with Sprut.hub services",
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production node index.js",
@@ -36,8 +36,6 @@
     "@fastify/swagger-ui": "^3.0.0",
     "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
-    "install": "^0.13.0",
-    "npm": "^10.5.0",
     "spruthub-client": "^1.2.14"
   },
   "devDependencies": {

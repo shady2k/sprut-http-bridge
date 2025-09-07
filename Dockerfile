@@ -1,21 +1,42 @@
-# Use the official Node.js LTS image as a parent image
-FROM node:lts
+# Multi-stage build for optimized production image
+FROM node:lts-alpine AS builder
 
-# Set the working directory in the Docker container
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json (if available) to the container
-COPY package.json ./
-COPY package-lock.json* ./
+# Copy package files
+COPY package.json package-lock.json* ./
 
-# Install app dependencies using npm ci
-RUN npm ci --omit=dev --ignore-scripts
+# Install dependencies (including dev dependencies for build if needed)
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
-# Bundle app source inside Docker image
-COPY . .
+# Production stage
+FROM node:lts-alpine AS production
 
-# Your app binds to a specific port, make sure you expose it
+# Install dumb-init
+RUN apk add --no-cache dumb-init
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S app -u 1001 -G nodejs
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy dependencies from builder stage
+COPY --from=builder --chown=app:nodejs /usr/src/app/node_modules ./node_modules
+
+# Copy application source
+COPY --chown=app:nodejs . .
+
+# Switch to non-root user
+USER app
+
+# Expose port
 EXPOSE 3000
 
-# Define the command to run your app using CMD
-CMD [ "npm", "start" ]
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["npm", "start"]
