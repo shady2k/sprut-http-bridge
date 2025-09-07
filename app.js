@@ -107,7 +107,7 @@ async function build(opts = {}) {
   }
 
   // Completely dynamic handler - works with any method from schema
-  function createGenericHandler(methodName, methodSchema) {
+  function createGenericHandler(methodName, methodSchema, routePath) {
     return async (request, reply) => {
       try {
         // Build parameters based on HTTP request
@@ -117,8 +117,9 @@ async function build(opts = {}) {
           ...request.query
         };
 
-        if (request.method.toUpperCase() === 'GET' && methodSchema && methodSchema.params) {
-          const allParams = { ...request.params, ...request.query };
+        // For methods with path parameters, construct nested parameters for spruthub-client
+        if (methodSchema && methodSchema.params && routePath.includes(':')) {
+          const allParams = { ...request.params, ...request.query, ...request.body };
           params = constructNestedParams(allParams, methodSchema.params);
         }
 
@@ -234,8 +235,9 @@ async function build(opts = {}) {
     }
 
 
-    // Add body validation for POST/PUT/PATCH methods
-    if (['POST', 'PUT', 'PATCH'].includes(httpMethod.toUpperCase()) && methodSchema.params) {
+    // Add body validation for POST/PUT/PATCH methods that don't have path parameters
+    // (path parameter methods use automatic parameter construction instead)
+    if (['POST', 'PUT', 'PATCH'].includes(httpMethod.toUpperCase()) && methodSchema.params && !path.includes(':')) {
       fastifySchema.body = methodSchema.params;
       
       // Include definitions for body if schema has $ref references
@@ -247,7 +249,7 @@ async function build(opts = {}) {
     }
 
     // Register the route with generic handler
-    const handler = createGenericHandler(methodName, methodSchema);
+    const handler = createGenericHandler(methodName, methodSchema, path);
     app[httpMethod.toLowerCase()](path, { schema: fastifySchema }, handler);
     app.log.info(`Registered ${httpMethod} ${path} -> ${methodName}`);
   });

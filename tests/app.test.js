@@ -182,6 +182,34 @@ const responseRules = [
       })
     },
     {
+      match: (message) => message.params?.scenario?.delete !== undefined,
+      response: (message) => ({
+        id: message.id,
+        result: {
+          isSuccess: true,
+          code: 0,
+          message: "Scenario deleted successfully",
+          data: {
+            scenario: {
+              delete: {}
+            }
+          }
+        }
+      })
+    },
+    {
+      match: (message) => message.params?.scenario?.run !== undefined,
+      response: (message) => ({
+        id: message.id,
+        result: {
+          isSuccess: true,
+          code: 0,
+          message: "Scenario executed successfully",
+          data: {}
+        }
+      })
+    },
+    {
       match: () => true,
       response: (message) => {
         return {
@@ -406,6 +434,46 @@ describe("Sprut.hub HTTP Bridge", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual(expected);
+    });
+  });
+
+  describe("Scenario endpoints", () => {
+    test("should delete a scenario via DELETE /scenarios/:index", async () => {
+      const response = await app.inject({
+        method: "DELETE",
+        url: "/scenarios/94",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({
+        result: {
+          isSuccess: true,
+          code: 0,
+          message: "Scenario deleted successfully",
+          data: {
+            scenario: {
+              delete: {}
+            }
+          }
+        }
+      });
+    });
+
+    test("should run a scenario via POST /scenarios/:index/run", async () => {
+      const response = await app.inject({
+        method: "POST",
+        url: "/scenarios/94/run",
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({
+        result: {
+          isSuccess: true,
+          code: 0,
+          message: "Scenario executed successfully",
+          data: {}
+        }
+      });
     });
   });
 
